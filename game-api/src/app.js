@@ -28,11 +28,7 @@ export function createApp({ db, config, logger, services = createServices({ db }
   app.set('trust proxy', config.trustProxy);
   app.disable('x-powered-by');
 
-  app.use(helmet({ contentSecurityPolicy: {
-      directives: {
-        upgradeInsecureRequests: null
-      },
-    }, crossOriginResourcePolicy: false })); // JSON only
+  app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: false })); // JSON only
   app.use((req, res, next) => {
     req.id = req.get('x-request-id')?.slice(0, 64) || crypto.randomUUID();
     res.set('X-Request-Id', req.id);
