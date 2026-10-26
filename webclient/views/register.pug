@@ -1,0 +1,28 @@
+extends layout
+include mixins
+
+block content
+  - const fe = fieldErrors || {}
+  section.auth
+    h1 Create account
+    p.lede The same account works in the game and here.
+    if error
+      .flash.flash-error(role="alert")= error
+    form.stack(method="post" action="/register")
+      +csrf
+      label.field
+        span Username
+        input(type="text" name="username" value=values.username minlength="3" maxlength="24" pattern="[A-Za-z0-9_]+" autocomplete="username" autocapitalize="none" spellcheck="false" required aria-invalid=fe.username ? 'true' : undefined)
+        small.help= fe.username ? `Username ${fe.username}` : '3-24 letters, digits or underscores.'
+      label.field
+        span Email #[em (optional)]
+        input(type="email" name="email" value=values.email autocomplete="email" aria-invalid=fe.email ? 'true' : undefined)
+      label.field
+        span Password
+        input(type="password" name="password" minlength="8" maxlength="128" autocomplete="new-password" required aria-invalid=fe.password ? 'true' : undefined)
+        small.help At least 8 characters.
+      label.field
+        span Confirm password
+        input(type="password" name="confirm" minlength="8" maxlength="128" autocomplete="new-password" required)
+      button.btn.btn-primary.btn-block(type="submit") Create account
+    p.alt Already playing? #[a(href="/login") Sign in]

@@ -1,0 +1,115 @@
+extends layout
+include mixins
+
+block content
+  - const def = it.item
+  - const here = it.container
+  - const other = h.otherContainer(here)
+  - const locked = inventory.containers[here].locked
+  - const canEnter = (c) => !(c === 'loadout' && (!def.loadoutAllowed || inventory.containers.loadout.locked))
+  - const dest = inventory.containers[to]
+
+  a.back(href=`/stash?view=${here}`) ‹ #{h.CONTAINER_LABELS[here]}
+
+  article.item-card(class=`rarity-${def.rarity}`)
+    .item-head
+      .item-icon
+        +icon(def.category)
+      div
+        h1= def.name
+        p.meta
+          span.rarity-label= def.rarity
+          span  · #{def.category} · #{h.CONTAINER_LABELS[here]} slot #{it.slot + 1}
+    if def.description
+      p.desc= def.description
+    dl.stats
+      div
+        dt Quantity
+        dd
+          | #{h.number(it.quantity)}
+          if def.maxStack > 1
+            small  of #{def.maxStack} per stack
+      div
+        dt Sell value
+        dd= def.sellable ? `${h.number(def.sellPrice)} credits each` : 'Cannot be sold'
+      div
+        dt In matches
+        dd= def.loadoutAllowed ? 'Can be equipped' : 'Stash only'
+
+  if locked
+    p.notice This item is in your loadout, which is locked while you're in a match.
+  else
+    section.panel
+      h2 Move
+      if canEnter(other)
+        form.row(method="post" action=`/items/${it.id}/move`)
+          +actionFields(inventory.revision, here)
+          input(type="hidden" name="container" value=other)
+          button.btn.btn-primary(type="submit") Send to #{h.CONTAINER_LABELS[other]}
+          span.hint Stacks with matching items, otherwise takes the first free slot.
+
+      h3 Or pick a slot
+      nav.tabs.tabs-small(aria-label="Destination")
+        each label, key in h.CONTAINER_LABELS
+          a.tab(href=`/items/${it.id}?to=${key}` class=key === to ? 'active' : undefined aria-current=key === to ? 'true' : undefined)= label
+
+      if !canEnter(to)
+        p.notice= def.loadoutAllowed ? 'Your loadout is locked while you are in a match.' : `${def.name} can't be taken into a match.`
+      else
+        form(method="post" action=`/items/${it.id}/move`)
+          //- Disabled default button: pressing Enter in the quantity field must not pick slot 1.
+          button.visually-hidden(type="submit" disabled tabindex="-1" aria-hidden="true") Move
+          +actionFields(inventory.revision, here)
+          input(type="hidden" name="container" value=to)
+          if it.quantity > 1
+            label.field.field-inline
+              span How many
+              input(type="number" name="quantity" min="1" max=it.quantity value=it.quantity inputmode="numeric" required)
+          ul.grid.grid-picker
+            each cell, slot in h.grid(dest)
+              - const isSelf = to === here && slot === it.slot
+              li.cell
+                if cell
+                  button.pick(type="submit" name="slot" value=slot disabled=isSelf class=[`rarity-${cell.item.rarity}`, isSelf ? 'is-self' : null] aria-label=`Slot ${slot + 1}: ${cell.item.name}${isSelf ? ' (this item)' : ''}`)
+                    +icon(cell.item.category)
+                    if cell.item.maxStack > 1
+                      span.tile-qty= h.number(cell.quantity)
+                else
+                  button.pick.is-empty(type="submit" name="slot" value=slot aria-label=`Empty slot ${slot + 1}`)
+                    span.slot-no= slot + 1
+          p.hint Empty slot: move there. Same item: stack. Different item: swap places.
+
+    if def.maxStack > 1 && it.quantity > 1
+      section.panel
+        h2 Split stack
+        form.row(method="post" action=`/items/${it.id}/split`)
+          +actionFields(inventory.revision, here)
+          label.field.field-inline
+            span Take out
+            input(type="number" name="quantity" min="1" max=it.quantity - 1 value=Math.floor(it.quantity / 2) inputmode="numeric" required)
+          button.btn(type="submit") Split
+
+    if def.sellable
+      section.panel
+        h2 Sell
+        form.row(method="post" action=`/items/${it.id}/sell`)
+          +actionFields(inventory.revision, here)
+          if it.quantity > 1
+            label.field.field-inline
+              span Quantity
+              input(type="number" name="quantity" min="1" max=it.quantity value=it.quantity inputmode="numeric" required)
+          button.btn(type="submit") Sell for #{h.number(def.sellPrice)} each
+
+    if def.discardable
+      section.panel.panel-danger
+        h2 Throw away
+        form(method="post" action=`/items/${it.id}/discard`)
+          +actionFields(inventory.revision, here)
+          if it.quantity > 1
+            label.field.field-inline
+              span Quantity
+              input(type="number" name="quantity" min="1" max=it.quantity value=it.quantity inputmode="numeric" required)
+          label.check
+            input(type="checkbox" name="confirm" value="yes" required)
+            span I understand this can't be undone
+          button.btn.btn-danger(type="submit") Throw away

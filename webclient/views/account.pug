@@ -1,0 +1,77 @@
+extends layout
+include mixins
+
+block content
+  section.panel
+    h1= account.username
+    dl.stats
+      div
+        dt Credits
+        dd= h.number(account.credits)
+      div
+        dt Stash
+        dd #{account.stashSlots} slots
+      div
+        dt Status
+        dd= account.inMatch ? 'In a match' : 'Not in a match'
+      div
+        dt Member since
+        dd= new Date(account.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    if account.email
+      p.hint Email: #{account.email}
+
+  section.panel
+    h2 Signed-in devices
+    ul.list
+      each s in sessions
+        - const where = s.ip ? ' · ' + s.ip : ''
+        li.list-row
+          div
+            strong= h.deviceLabel(s)
+            if s.current
+              span.badge This device
+            br
+            small.muted Last active #{h.timeAgo(s.lastSeenAt)}#{where}
+          if s.current
+            form(method="post" action="/logout")
+              +csrf
+              button.btn.btn-ghost(type="submit") Sign out
+          else
+            form(method="post" action=`/account/sessions/${s.id}/revoke`)
+              +csrf
+              button.btn.btn-ghost(type="submit") Sign out
+
+  section.panel
+    h2 Recent activity
+    if events.length === 0
+      p.muted Nothing yet.
+    else
+      ul.list
+        each e in events
+          - const count = e.quantity > 0 ? h.number(e.quantity) + ' × ' : ''
+          - const who = e.actor === 'player' ? 'you' : e.actor === 'server' ? 'game server' : 'system'
+          li.list-row
+            div
+              strong= h.eventLabel(e)
+              if e.itemName
+                |  #{count}#{e.itemName}
+              br
+              small.muted #{h.timeAgo(e.at)} · #{who}
+            if e.creditsDelta
+              span.delta +#{h.number(e.creditsDelta)}
+
+  section.panel
+    h2 Change password
+    p.hint Changing it signs you out everywhere else, including the game.
+    form.stack(method="post" action="/account/password")
+      +csrf
+      label.field
+        span Current password
+        input(type="password" name="currentPassword" autocomplete="current-password" required)
+      label.field
+        span New password
+        input(type="password" name="newPassword" minlength="8" maxlength="128" autocomplete="new-password" required)
+      label.field
+        span Confirm new password
+        input(type="password" name="confirm" minlength="8" maxlength="128" autocomplete="new-password" required)
+      button.btn(type="submit") Change password

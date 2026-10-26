@@ -1,0 +1,21 @@
+# Local MySQL for development. The two Node apps run on your machine (npm run dev:api / dev:web).
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: game
+      MYSQL_USER: game
+      MYSQL_PASSWORD: change-me
+      MYSQL_ROOT_PASSWORD: change-me-root
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-pchange-me-root"]
+      interval: 5s
+      retries: 20
+
+volumes:
+  mysql-data:

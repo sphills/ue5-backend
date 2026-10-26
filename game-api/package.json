@@ -1,0 +1,22 @@
+{
+  "name": "game-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Authoritative Game API: accounts, sessions, inventories and game rules. The only service that talks to MySQL.",
+  "type": "module",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "migrate": "node scripts/migrate.js",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "mysql2": "^3.14.0"
+  }
+}

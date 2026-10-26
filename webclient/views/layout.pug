@@ -1,0 +1,23 @@
+doctype html
+html(lang="en")
+  head
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover")
+    meta(name="theme-color" content="#101318")
+    meta(name="color-scheme" content="dark")
+    title= title ? `${title} · ${siteName}` : siteName
+    link(rel="icon" type="image/svg+xml" href="/static/favicon.svg")
+    link(rel="stylesheet" href="/static/styles.css")
+  body
+    header.topbar
+      a.brand(href="/")
+        span.brand-mark(aria-hidden="true")
+        span= siteName
+      if signedIn
+        nav.topnav(aria-label="Main")
+          a(href="/stash" class=path === '/stash' || path.startsWith('/items') ? 'active' : undefined) Inventory
+          a(href="/account" class=path === '/account' ? 'active' : undefined) Account
+    main.page
+      if flash
+        .flash(class=`flash-${flash.type}` role=flash.type === 'error' ? 'alert' : 'status')= flash.text
+      block content

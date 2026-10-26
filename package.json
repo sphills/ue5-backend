@@ -1,0 +1,20 @@
+{
+  "name": "ue5-backend",
+  "private": true,
+  "description": "Backend for a UE5 game: Game API (Express + MySQL) and WebClient (Express + Pug)",
+  "workspaces": [
+    "game-api",
+    "webclient"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "migrate": "npm run migrate -w game-api",
+    "dev:api": "npm run dev -w game-api",
+    "dev:web": "npm run dev -w webclient",
+    "start:api": "npm start -w game-api",
+    "start:web": "npm start -w webclient",
+    "test": "npm test --workspaces"
+  }
+}

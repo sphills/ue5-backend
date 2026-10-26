@@ -1,0 +1,43 @@
+//- Shared bits of markup.
+
+mixin csrf
+  input(type="hidden" name="_csrf" value=csrfToken)
+
+//- Hidden fields every inventory action form sends back to the WebClient.
+mixin actionFields(revision, from)
+  +csrf
+  input(type="hidden" name="revision" value=revision)
+  input(type="hidden" name="from" value=from)
+
+mixin icon(category)
+  svg.icon(viewBox="0 0 24 24" aria-hidden="true" focusable="false")
+    case category
+      when 'weapon'
+        circle(cx="12" cy="12" r="6.5")
+        circle(cx="12" cy="12" r="1.5")
+        path(d="M12 2.5v5M12 16.5v5M2.5 12h5M16.5 12h5")
+      when 'armor'
+        path(d="M12 3l7 3v5.5c0 4.3-2.9 8-7 9.5-4.1-1.5-7-5.2-7-9.5V6z")
+      when 'ammo'
+        path(d="M6 20V10l1.5-4L9 10v10zM11 20V10l1.5-4L14 10v10zM16 20V10l1.5-4L19 10v10z")
+      when 'consumable'
+        rect(x="4" y="4" width="16" height="16" rx="4")
+        path(d="M12 8v8M8 12h8")
+      when 'material'
+        path(d="M12 2.8l8 4.6v9.2l-8 4.6-8-4.6V7.4z")
+        path(d="M4 7.4l8 4.6 8-4.6M12 12v9.2")
+      when 'quest'
+        circle(cx="8" cy="12" r="4")
+        path(d="M12 12h9M18 12v3M21 12v3")
+      when 'cosmetic'
+        path(d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z")
+      default
+        rect(x="5" y="5" width="14" height="14" rx="3")
+
+mixin tile(it, href)
+  a.tile(href=href class=`rarity-${it.item.rarity}`)
+    +icon(it.item.category)
+    span.tile-name= it.item.name
+    if it.item.maxStack > 1
+      span.tile-qty= h.number(it.quantity)
+    span.visually-hidden= ` (${it.item.rarity})`

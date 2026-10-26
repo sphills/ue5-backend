@@ -1,0 +1,38 @@
+extends layout
+include mixins
+
+block content
+  - const container = inventory.containers[view]
+  section.summary
+    div
+      span.label Credits
+      strong.credits= h.number(inventory.credits)
+    if inventory.inMatch
+      span.badge.badge-live In a match
+
+  nav.tabs(aria-label="Containers")
+    each label, key in h.CONTAINER_LABELS
+      - const c = inventory.containers[key]
+      a.tab(href=`/stash?view=${key}` class=key === view ? 'active' : undefined aria-current=key === view ? 'page' : undefined)
+        span= label
+        span.count #{c.used}/#{c.capacity}
+
+  if container.locked
+    p.notice Your loadout is locked while you're in a match. You can still manage your stash.
+
+  .toolbar
+    p.hint Tap an item to move, split, sell or discard it.
+    form(method="post" action="/stash/sort")
+      +csrf
+      input(type="hidden" name="container" value=view)
+      input(type="hidden" name="revision" value=inventory.revision)
+      button.btn.btn-ghost(type="submit" disabled=container.locked || container.used === 0) Sort
+
+  ul.grid(aria-label=`${h.CONTAINER_LABELS[view]} slots`)
+    each cell, slot in h.grid(container)
+      li.cell
+        if cell
+          +tile(cell, `/items/${cell.id}`)
+        else
+          span.empty
+            span.visually-hidden Empty slot #{slot + 1}
