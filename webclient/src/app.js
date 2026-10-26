@@ -27,7 +27,7 @@ export function createApp({ config, logger = console }) {
   app.use(
     helmet({
       contentSecurityPolicy: {
-        directives: { 'script-src': ["'self'"], 'style-src': ["'self'"], 'img-src': ["'self'", 'data:'], 'form-action': ["'self'"], 'upgradeInsecureRequests': 'null' },
+        directives: { 'script-src': ["'self'"], 'style-src': ["'self'"], 'img-src': ["'self'", 'data:'], 'form-action': ["'self'"], 'upgradeInsecureRequests': null },
       },
     }),
   );
